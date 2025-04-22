@@ -15,10 +15,8 @@ int main()
     for (int i = 0; i < n; i++)
     {
         p[i].id = i + 1;
-        printf("\nEnter arrival time for p[%d]: ", p[i].id);
-        scanf("%d", &p[i].at);
-        printf("\nEnter burst time for p[%d]: ", p[i].id);
-        scanf("%d", &p[i].bt);
+        printf("\nEnter arrival & burst times for p[%d]: ", p[i].id);
+        scanf("%d%d", &p[i].at, &p[i].bt);
     }
 
     p[0].ct = p[0].at + p[0].bt;
