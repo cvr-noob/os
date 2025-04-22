@@ -33,8 +33,8 @@ int main()
         total_wt += p[i].wt;
     }
 
-    printf("\nAverage waiting time: %.2f", (float)total_wt / 2);
-    printf("\nAverage turnaround time: %.2f", (float)total_tat / 2);
+    printf("\nAverage waiting time: %.2f", (float)total_wt / n);
+    printf("\nAverage turnaround time: %.2f", (float)total_tat / n);
 
     printf("\n%-5s | %-12s | %-10s | %-15s | %-12s | %-16s\n",
            "PID", "Arrival Time", "Burst Time", "Completion Time", "Waiting Time", "Turnaround Time");
