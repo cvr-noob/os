@@ -25,7 +25,7 @@ int main()
     int total_wt = p[0].wt = p[0].at;
     int total_tat = p[0].tat = p[0].bt;
 
-    for (int i = 0; i < n; i++)
+    for (int i = 1; i < n; i++)
     {
         p[i].wt = p[i - 1].ct + p[i].at;
         p[i].ct = p[i].at + p[i].wt + p[i].bt;
