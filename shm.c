@@ -20,7 +20,7 @@ int main()
     scanf("%[^\n]", data);
 
     // Print
-    printf("Data inside shared memory: ", data);
+    printf("Data inside shared memory: %s\n", data);
 
     // Cleanup
     shmdt(data);
