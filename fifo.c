@@ -1,38 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 #include <fcntl.h>
-#include <sys/ipc.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <string.h>
 #include <sys/wait.h>
+#include <sys/ipc.h>
+#include <sys/stat.h>
 
 int main()
 {
-    pid_t pid;
-    
-    mkfifo("./myfifo", 0666);
-    
-    pid = fork();
+    // Make fifo
+    mkfifo("./myfifo", 0644);
+
+    int pid = fork();
     if (pid > 0)
-    {
+    {  // Parent process
+        // Open fifo
         int fd = open("./myfifo", O_WRONLY);
-        char *data = "Hello! I am data in a FIFO";
-        write(fd, data, strlen(data)+1);
-        printf("Parent written data into myfifo\n");
         
+        // Write
+        char *data = "Hello child!";
+        write(fd, data, strlen(data)+1);
+        
+        // Cleanup
         close(fd);
         wait(NULL);
-        unlink("myfifo");
+        unlink("./myfifo");
     }
     else
-    {
-        char buff[64];
+    {  // Child process
+        // Open fifo
         int fd = open("./myfifo", O_RDONLY);
-        buff[read(fd, buff, 64)] = '\0';
-        printf("myfifo has: %s\n", buff);
 
+        // Read
+        char data[128];
+        int bytes = read(fd, data, 128);
+        data[bytes] = '\0';
+
+        // Print
+        printf("Child received: %s\n", data);
+
+        // Cleanup
         close(fd);
     }
 }
