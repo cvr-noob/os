@@ -4,60 +4,65 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <linux/limits.h>
 
 #include <dirent.h>
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
 
-void print_permissions(mode_t mode);
+void print_perms(mode_t);
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-    const char *dirname = argv[1];
-    DIR *dir = opendir(dirname);
-    struct dirent *entry;
-
-    while ((entry = readdir(dir)) != NULL)
+    // Open dir
+    DIR *dir = opendir(".");
+    
+    // Read dir
+    struct dirent *ent;
+    while ((ent = readdir(dir)) != NULL)
     {
-        char path[PATH_MAX];
-        snprintf(path, PATH_MAX, "%s/%s", dirname, entry->d_name);
-
+        // Get stats
         struct stat file_stat;
-        stat(path, &file_stat);
+        stat(ent->d_name, &file_stat);
+        
+        // Print permissions
+        print_perms(file_stat.st_mode);
 
-        print_permissions(file_stat.st_mode); // 1. Permissions
+        // Print link count
+        printf("\t%d", file_stat.st_nlink);
+        
+        // Print username
+        struct passwd *usr_inf = getpwuid(file_stat.st_uid);
+        printf("\t%s", usr_inf->pw_name);
 
-        struct passwd *user_info = getpwuid(file_stat.st_uid);
-        printf("\t%s", user_info->pw_name); // 2. Username
+        // Print group name
+        struct group *grp_inf = getgrgid(file_stat.st_gid);
+        printf("\t%s", grp_inf->gr_name);
 
-        struct group *group_info = getgrgid(file_stat.st_gid);
-        printf("\t%s", group_info->gr_name); // 3. Group name
+        // Print size
+        printf("\t%d", file_stat.st_size);
 
-        printf("\t%ld", file_stat.st_size); // 4. Size
+        // Print last modified time
+        struct tm *tm_inf = localtime(&file_stat.st_mtime);
+        char time[100];
+        strftime(time, sizeof(time), "%b %d %H:%M", tm_inf);
+        printf("\t%s", time);
 
-        struct tm *time_info = localtime(&file_stat.st_mtime);
-        char time_str[80];
-        strftime(time_str, sizeof(time_str), "%b %d %H:%M", time_info);
-        printf("\t%s", time_str); // 5. Modification time
-
-        printf("\t%s\n", entry->d_name); // 6. File name
+        // Print name
+        printf("\t%s\n", ent->d_name);
     }
-
-    return 0;
 }
 
-void print_permissions(mode_t mode)
+void print_perms(mode_t mode)
 {
-    printf(S_ISDIR(mode) ? "d" : "-");
-    printf((mode & S_IRUSR) ? "r" : "-");
-    printf((mode & S_IWUSR) ? "w" : "-");
-    printf((mode & S_IXUSR) ? "x" : "-");
-    printf((mode & S_IRGRP) ? "r" : "-");
-    printf((mode & S_IWGRP) ? "w" : "-");
-    printf((mode & S_IXGRP) ? "x" : "-");
-    printf((mode & S_IROTH) ? "r" : "-");
-    printf((mode & S_IWOTH) ? "w" : "-");
-    printf((mode & S_IXOTH) ? "x" : "-");
+    int perms[] = {
+        S_IRUSR, S_IWUSR, S_IXUSR,
+        S_IRGRP, S_IWGRP, S_IXGRP,
+        S_IROTH, S_IWOTH, S_IXOTH,
+    };
+    const char *rwx = "rwx";
+
+    putchar(S_ISDIR(mode) ? 'd' : '-');
+    for (int i=0; i<9; i++)
+        putchar(mode & perms[i] ? rwx[i % 3] : '-');
 }
