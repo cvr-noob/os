@@ -1,25 +1,25 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
 typedef struct message
 {
     long type;
-    char text[256];
+    char text[128];
 } message;
 
 int main()
 {
-    FILE *fp = fopen("./msgq", "w");
-    fclose(fp);
+    // Generate Key
+    int key = ftok("./msgq", 65);
+    
+    // Generate message queue
+    int msgqid = msgget(key, 0644 | IPC_CREAT);
 
-    key_t key = ftok("./msgq", 65);
-    int msgid = msgget(key, 0666 | IPC_CREAT);
-
-    message msg = {1, "Hello"};
-    msgsnd(msgid, &msg, sizeof(msg.text), 0);
-    printf("Message sent.\n");
-
-    return 0;
+    // Create message
+    message msg = {1, "Hello world"};
+    
+    // Send message to message queue
+    msgsnd(msgqid, &msg, sizeof(msg.text), 0);
+    printf("Message sent to the message queue.\n");
 }
