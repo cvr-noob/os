@@ -2,41 +2,43 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/wait.h>
-
-#define BUFF_SIZE 1024
 
 int main()
 {
+    // Declare
     int fd[2];
-    pid_t p;
-
+    
+    // Create pipe
     pipe(fd);
 
-    p = fork();
+    int p = fork();
     if (p > 0)
-    {
-        close(fd[0]);
-        printf("Parent sending data to child...\n");
+    {  // Parent process
+        close(fd[0]);  // Close read fd
         
-        const char *data = "Hello from parent!";
-        write(fd[1], data, strlen(data) + 1);
+        // Write
+        const char* data = "Hello child!\n";
+        write(fd[1], data, strlen(data)+1);
 
+        // Close read fd and print
         close(fd[1]);
+        printf("Parent written data into the pipe.\n");
+
+        // Wait for child process
         wait(NULL);
     }
     else
-    {
-        close(fd[1]);
-        char buff[BUFF_SIZE];
-        printf("Child receiving data from parent...\n");
-
-        buff[read(fd[0], buff, BUFF_SIZE)] = '\0';
+    {  // Child process
+        close(fd[1]);  // Close write fd
         
-        printf("Data received: %s\n", buff);
+        // Read
+        char data[128];
+        int bytes = read(fd[0], data, 128);
+        data[bytes] = '\0';
+
+        // Print and close read fd
+        printf("Child received: %s\n", data);
         close(fd[0]);
     }
-
-    return 0;
 }
